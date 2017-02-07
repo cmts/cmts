@@ -1,0 +1,16 @@
+TOPDIR=$(shell pwd)
+CFLAGS  += -Wall
+DELETE  = rm -rf
+
+
+##########X86###############
+CROSS=
+###########################
+
+
+CFLAGS += -O2
+
+
+
+CC=$(CROSS)gcc
+LDFLAGS += -lpthread -lz
