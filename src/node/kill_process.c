@@ -8,6 +8,7 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "config.h"
 #include "kill_process.h"
 
 void kill_converting_process(const char *pid)
@@ -41,7 +42,7 @@ int kill_pid_handle(char *dst, char *msg)
     printf("\t KILLPID: pid = %s", p);
     sprintf(dst, "killed pid=%s", p);
 
-    printf("dst = [%s], len = [%d]\n", dst, strlen(dst));
+    printf("dst = [%s], len = [%lu]\n", dst, strlen(dst));
     if (strlen(dst) > strlen("killed pid=")) {
         return strlen(dst) - 1;
     } else {

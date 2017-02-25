@@ -2,7 +2,8 @@ include ./config
 
 NODE_OBJS	+= \
 	   $(TOPDIR)/node/node.o \
-	   $(TOPDIR)/node/kill_process.o
+	   $(TOPDIR)/node/kill_process.o \
+	   $(TOPDIR)/node/cpu_get_freq.o
 
 NODE_TARGET	= $(TOPDIR)/bin/node
 

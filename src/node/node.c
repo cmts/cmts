@@ -8,10 +8,10 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "config.h"
 #include "kill_process.h"
+#include "cpu_get_freq.h"
 
-#define TASK_MAX_NUM            48
-#define TASK_CMD_MAX_LEN        2048
 typedef struct transcode_taskinfo_s {
     pid_t task_pid;
     char cmd[TASK_CMD_MAX_LEN];
@@ -66,6 +66,46 @@ static int node_transcode_listen(int sockfd)
 
     return sockfd;
 }
+
+static int process_cancel(int sockfd, char *buf)
+{
+    int ret = 0;
+    char pid_process_msg[TASK_CMD_MAX_LEN];
+
+    memset(pid_process_msg, 0, sizeof(pid_process_msg));
+    ret = kill_pid_handle(pid_process_msg, buf);
+    if (ret > 0) {
+        if (send(sockfd, pid_process_msg, strlen(pid_process_msg), 0) == -1) {
+            printf("send:%s", strerror(errno));
+            return -1;
+        }
+    }
+
+    if (sockfd) {
+        close(sockfd);
+    }
+
+    return ret;
+}
+
+static int process_get_resource(int sockfd, char *msg)
+{
+    char buf[TASK_CMD_MAX_LEN];
+
+    memset(buf, 0, sizeof(buf));
+    cpu_get_freq(buf);
+
+    if (send(sockfd, buf, strlen(buf), 0) == -1) {
+        printf("send:%s", strerror(errno));
+        return -1;
+    }
+
+    if (sockfd) {
+        close(sockfd);
+    }
+    return 0;
+}
+
 /* accept new connect and use the client_sockfd to recv message from client */
 static int node_transcode_worker(int sockfd)
 {
@@ -75,9 +115,7 @@ static int node_transcode_worker(int sockfd)
     unsigned int sin_size = 0;
     struct sockaddr_in client_addr;
     char recvbuf[TASK_CMD_MAX_LEN];
-    char pid_process_msg[TASK_CMD_MAX_LEN];
     pid_t child_pid = 0;
-
 
     while (1) {
         if ((client_sockfd = accept(sockfd, (struct sockaddr *) &client_addr, &sin_size)) == -1) {
@@ -94,24 +132,9 @@ static int node_transcode_worker(int sockfd)
             }
             if (recvbytes < 16) {
                 if (!strncasecmp ((char *)&recvbuf, "pid=", strlen ("pid="))) {
-                    memset(pid_process_msg, 0, sizeof(pid_process_msg));
-                    ret = kill_pid_handle(pid_process_msg, recvbuf);
-
-                    fprintf(stderr, "oooooooo ret = [%d]\n", ret);
-                    if (ret > 0) {
-                        if (send(client_sockfd, pid_process_msg, strlen(pid_process_msg), 0) == -1) {
-                            printf("send:%s", strerror(errno));
-                            return -1;
-                        }
-                    }
-
-                    if (client_sockfd) {
-                        close (client_sockfd);
-                    }
+                    ret = process_cancel(client_sockfd, recvbuf);
                 } else if (!strncasecmp ((char *)&recvbuf, "getcpu", strlen ("getcpu"))) {
-                    if(client_sockfd) {
-                        close(client_sockfd);
-                    }
+                    process_get_resource(client_sockfd, recvbuf);
                 } else {
                     if (client_sockfd) {
                         close(client_sockfd);
@@ -122,7 +145,7 @@ static int node_transcode_worker(int sockfd)
             }
         } else {
             if (client_sockfd) {
-//                close(client_sockfd);
+                close(client_sockfd);
             }
         }
 
