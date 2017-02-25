@@ -8,6 +8,8 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include "kill_process.h"
+
 #define TASK_MAX_NUM            48
 #define TASK_CMD_MAX_LEN        2048
 typedef struct transcode_taskinfo_s {
@@ -64,15 +66,18 @@ static int node_transcode_listen(int sockfd)
 
     return sockfd;
 }
-
 /* accept new connect and use the client_sockfd to recv message from client */
 static int node_transcode_worker(int sockfd)
 {
+    int ret = 0;
     int recvbytes = 0;
     int client_sockfd = 0;
     unsigned int sin_size = 0;
     struct sockaddr_in client_addr;
-    char recvbuf[2048];
+    char recvbuf[TASK_CMD_MAX_LEN];
+    char pid_process_msg[TASK_CMD_MAX_LEN];
+    pid_t child_pid = 0;
+
 
     while (1) {
         if ((client_sockfd = accept(sockfd, (struct sockaddr *) &client_addr, &sin_size)) == -1) {
@@ -81,14 +86,44 @@ static int node_transcode_worker(int sockfd)
             continue;
         }
 
-        memset(recvbuf, 0, sizeof(recvbuf));
-        if ((recvbytes = recv(client_sockfd, &recvbuf, sizeof(recvbuf), 0)) == -1) {
-            printf("recv:[%s]\n", strerror(errno));
-            exit(1);
-        }
+        if (!(child_pid = fork())) {
+            memset(recvbuf, 0, sizeof(recvbuf));
+            if ((recvbytes = recv(client_sockfd, &recvbuf, sizeof(recvbuf), 0)) == -1) {
+                printf("recv:[%s]\n", strerror(errno));
+                exit(1);
+            }
+            if (recvbytes < 16) {
+                if (!strncasecmp ((char *)&recvbuf, "pid=", strlen ("pid="))) {
+                    memset(pid_process_msg, 0, sizeof(pid_process_msg));
+                    ret = kill_pid_handle(pid_process_msg, recvbuf);
 
-        if (client_sockfd) {
-            close(client_sockfd);
+                    fprintf(stderr, "oooooooo ret = [%d]\n", ret);
+                    if (ret > 0) {
+                        if (send(client_sockfd, pid_process_msg, strlen(pid_process_msg), 0) == -1) {
+                            printf("send:%s", strerror(errno));
+                            return -1;
+                        }
+                    }
+
+                    if (client_sockfd) {
+                        close (client_sockfd);
+                    }
+                } else if (!strncasecmp ((char *)&recvbuf, "getcpu", strlen ("getcpu"))) {
+                    if(client_sockfd) {
+                        close(client_sockfd);
+                    }
+                } else {
+                    if (client_sockfd) {
+                        close(client_sockfd);
+                    }
+                }
+            } else {
+
+            }
+        } else {
+            if (client_sockfd) {
+//                close(client_sockfd);
+            }
         }
 
         printf("recvied buffer size = %d\n", recvbytes);

@@ -10,7 +10,7 @@ CROSS=
 
 CFLAGS += -O2
 
-
+CFLAGS += -I. -I$(TOPDIR)/include -I$(TOPDIR)/node/
 
 CC=$(CROSS)gcc
 LDFLAGS += -lpthread -lz
