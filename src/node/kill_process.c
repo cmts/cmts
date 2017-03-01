@@ -11,7 +11,7 @@
 #include "config.h"
 #include "kill_process.h"
 
-void kill_converting_process(const char *pid)
+void kill_converting_process(char *pid)
 {
     char kill_cmd[16];
     char kill_result[128];
@@ -19,6 +19,7 @@ void kill_converting_process(const char *pid)
 
     memset(kill_result, 0, 128);
     memset(kill_cmd, 0, 16);
+
     snprintf(kill_cmd, 16, "kill -9 %s", pid);
 
     pfp = popen(kill_cmd, "r");
@@ -35,14 +36,21 @@ void kill_converting_process(const char *pid)
 
 int kill_pid_handle(char *dst, char *msg)
 {
+    char *temp_pid = NULL;
     char *p = (char *)msg;
+    int len = 0;
 
     p += strlen("pid=");
+    temp_pid = p;
+    while (*p != '\n' && *p != '\r') {
+        p++;
+    }
+    *p = 0;
+    p = temp_pid;
     kill_converting_process(p);
     printf("\t KILLPID: pid = %s", p);
     sprintf(dst, "killed pid=%s", p);
 
-    printf("dst = [%s], len = [%lu]\n", dst, strlen(dst));
     if (strlen(dst) > strlen("killed pid=")) {
         return strlen(dst) - 1;
     } else {

@@ -115,7 +115,10 @@ static int node_transcode_worker(int sockfd)
     unsigned int sin_size = 0;
     struct sockaddr_in client_addr;
     char recvbuf[TASK_CMD_MAX_LEN];
+    char response_string[128];
     pid_t child_pid = 0;
+    pid_t transcoder_pid = 0;
+    int status = 0;
 
     while (1) {
         if ((client_sockfd = accept(sockfd, (struct sockaddr *) &client_addr, &sin_size)) == -1) {
@@ -138,14 +141,45 @@ static int node_transcode_worker(int sockfd)
                 } else {
                     if (client_sockfd) {
                         close(client_sockfd);
+                        client_sockfd = 0;
                     }
                 }
             } else {
+                if (!(transcoder_pid = fork())) {
+                    close(client_sockfd);
+                    client_sockfd = 0;
+                    execlp("sh", "sh", "-c", recvbuf, NULL);
+                    exit(1);
+                }
 
+                memset(response_string, 0, sizeof(response_string));
+                sprintf (response_string, "waiting pid=%d", transcoder_pid);
+                if (send(client_sockfd, response_string, strlen(response_string), 0) == -1) {
+                    printf("child-send:%s", strerror(errno));
+                }
+
+                do {
+                    ret = waitpid(transcoder_pid, &status, WUNTRACED | WCONTINUED);
+                    if (ret == -1) {
+                        printf("child:waitpid:%s", strerror(errno));
+                        exit(-1);
+                    }
+                    if (WIFEXITED(status)) {
+                    } else if (WIFSIGNALED(status)) {
+                    } else if (WIFSTOPPED(status)) {
+                    } else if (WIFCONTINUED(status)) {
+                    }
+                } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+                if (client_sockfd) {
+                    close(client_sockfd);
+                    client_sockfd = 0;
+                }
             }
         } else {
             if (client_sockfd) {
                 close(client_sockfd);
+                client_sockfd = 0;
             }
         }
 
