@@ -22,12 +22,12 @@ transcode system
 
 # Test Use telnet command:
 
- # telnet 127.0.0.1 8899
- > Trying 127.0.0.1...
- > Connected to localhost.
- > Escape character is '^]'.
- > ffmpeg -v quiet -i ~/Movies/objectC/facebook.mp4 -f mpegts -y /tmp/output.ts
- > waiting pid=78905
+> telnet 127.0.0.1 8899
+> Trying 127.0.0.1...
+> Connected to localhost.
+> Escape character is '^]'.
+> ffmpeg -v quiet -i ~/Movies/objectC/facebook.mp4 -f mpegts -y /tmp/output.ts
+> waiting pid=78905
 
 
 
