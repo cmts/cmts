@@ -12,17 +12,17 @@ transcode system
 # Build
 1. bash install.sh
 
-build transcode node:
+# Build Transcode Node
 1. cd src/
 2. make
 
-start transcode node:
-3. ./bin/node
+# Start Transcode Node
+1. ./bin/node
 
 
-Test use telnet:
+# Test Use telnet command:
 
-telnet 127.0.0.1 8899
+ # telnet 127.0.0.1 8899
 Trying 127.0.0.1...
 Connected to localhost.
 Escape character is '^]'.
