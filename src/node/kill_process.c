@@ -38,7 +38,6 @@ int kill_pid_handle(char *dst, char *msg)
 {
     char *temp_pid = NULL;
     char *p = (char *)msg;
-    int len = 0;
 
     p += strlen("pid=");
     temp_pid = p;
