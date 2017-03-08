@@ -21,7 +21,7 @@ DST_FILE_NAME="${DST_FILE_DIR}/${DST_FILE_NAME_MD5}.${SRC_FILE_NAME##*.}"
 #echo "DST FILE NAME = ${DST_FILE_NAME}"
 
 echo ${DST_FILE_NAME}
-cp "${SRC_FILE_NAME}" ${DST_FILE_NAME}
+cp ${SRC_FILE_NAME} ${DST_FILE_NAME}
 
 FILE_INFO_INSERT_SQL="insert into cmts_files (src_filename, movie_name, dst_filename, status) value ( \"${SRC_FILE_NAME}\", \"${MOVIE_NAME}\", \"${DST_FILE_NAME}\", 0 )";
 

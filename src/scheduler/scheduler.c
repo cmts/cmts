@@ -41,6 +41,7 @@ int create_connect(int fd, char *ipaddr)
 
 void task_send(int fd, char *command)
 {
+    printf("send buffer = [%s]\n", command);
     write(fd, command, strlen(command));
 }
 
@@ -50,6 +51,8 @@ void task_pid_recv(int fd)
 
     memset(buffer, 0, sizeof(buffer));
     read(fd, buffer, sizeof(buffer));
+
+    printf("buffer = [%s]\n", buffer);
 }
 
 int main(int argc, char *argv[])
@@ -81,10 +84,10 @@ int main(int argc, char *argv[])
         }
     }
 
-    create_connect(sockfd, ipaddr);
+    sockfd = create_connect(sockfd, ipaddr);
     task_send(sockfd, commandline);
     task_pid_recv(sockfd);
-
+    sleep(1);
     return 0;
 }
 
