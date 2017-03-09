@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <pthread.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "config.h"
 #include "kill_process.h"
@@ -106,6 +107,21 @@ static int process_get_resource(int sockfd, char *msg)
     return 0;
 }
 
+static void zombie_handler (int sig)
+{
+      waitpid (-1, NULL, WNOHANG);
+}
+
+static void zombie_listen()
+{
+    struct sigaction act;
+
+    act.sa_handler = zombie_handler;
+    sigemptyset(&act.sa_mask);
+    act.sa_flags = 0;
+    sigaction(SIGCHLD, &act, NULL);
+}
+
 /* accept new connect and use the client_sockfd to recv message from client */
 static int node_transcode_worker(int sockfd)
 {
@@ -119,6 +135,8 @@ static int node_transcode_worker(int sockfd)
     pid_t child_pid = 0;
     pid_t transcoder_pid = 0;
     int status = 0;
+
+    zombie_listen();
 
     while (1) {
         if ((client_sockfd = accept(sockfd, (struct sockaddr *) &client_addr, &sin_size)) == -1) {
