@@ -1,0 +1,67 @@
+mysql> show tables;
++----------------+
+| Tables_in_cmts |
++----------------+
+| cmts_files     |
+| cmts_record    |
+| cmts_task      |
+| cmts_template  |
++----------------+
+4 rows in set (0.00 sec)
+
+mysql> select * from cmts_record;
+Empty set (0.00 sec)
+
+mysql> desc cmts_record;
++---------------+---------------------+------+-----+---------+----------------+
+| Field         | Type                | Null | Key | Default | Extra          |
++---------------+---------------------+------+-----+---------+----------------+
+| id            | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| input         | varchar(128)        | YES  |     | NULL    |                |
+| template_name | varchar(128)        | YES  |     | NULL    |                |
+| output        | varchar(128)        | YES  |     | NULL    |                |
+| starttime     | varchar(32)         | YES  |     | NULL    |                |
+| endtime       | varchar(32)         | YES  |     | NULL    |                |
+| task_pid      | varchar(8)          | YES  |     | NULL    |                |
++---------------+---------------------+------+-----+---------+----------------+
+7 rows in set (0.00 sec)
+
+mysql> desc cmts_task;
++---------------+---------------------+------+-----+---------+----------------+
+| Field         | Type                | Null | Key | Default | Extra          |
++---------------+---------------------+------+-----+---------+----------------+
+| id            | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| input         | varchar(128)        | YES  |     | NULL    |                |
+| template_name | varchar(128)        | YES  |     | NULL    |                |
+| output        | varchar(128)        | YES  |     | NULL    |                |
+| task_pid      | varchar(8)          | YES  |     | NULL    |                |
++---------------+---------------------+------+-----+---------+----------------+
+5 rows in set (0.00 sec)
+
+mysql> desc cmts_files;
++--------------+---------------------+------+-----+---------+----------------+
+| Field        | Type                | Null | Key | Default | Extra          |
++--------------+---------------------+------+-----+---------+----------------+
+| id           | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| src_filename | varchar(128)        | YES  |     | NULL    |                |
+| movie_name   | varchar(128)        | YES  |     | NULL    |                |
+| dst_filename | varchar(128)        | YES  |     | NULL    |                |
+| media_info   | varchar(256)        | YES  |     | NULL    |                |
+| status       | int(1)              | YES  |     | NULL    |                |
++--------------+---------------------+------+-----+---------+----------------+
+6 rows in set (0.00 sec)
+
+mysql> desc cmts_template;
++----------------+---------------------+------+-----+---------+----------------+
+| Field          | Type                | Null | Key | Default | Extra          |
++----------------+---------------------+------+-----+---------+----------------+
+| id             | bigint(20) unsigned | NO   | PRI | NULL    | auto_increment |
+| template_name  | varchar(128)        | YES  |     | NULL    |                |
+| filter_param   | varchar(128)        | YES  |     | NULL    |                |
+| video_param    | varchar(128)        | YES  |     | NULL    |                |
+| audio_param    | varchar(128)        | YES  |     | NULL    |                |
+| subtitle_param | varchar(128)        | YES  |     | NULL    |                |
++----------------+---------------------+------+-----+---------+----------------+
+6 rows in set (0.00 sec)
+
+
